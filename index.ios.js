@@ -8,7 +8,8 @@ import {
   Text,
   Image,
   TouchableHighlight,
-  View
+  View,
+  ImageEditor
 } from 'react-native';
 import Camera from 'react-native-camera';
 
@@ -42,7 +43,7 @@ class ViewCapture extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Image style={{width:'100%',height:'100%'}} source={{uri: this.props.image}}/>
+        <Image style={{width:200,height:200}} source={{uri: this.props.image}}/>
       </View>
     );
   }
@@ -51,13 +52,29 @@ class ViewCapture extends Component {
 
 class CameraView extends Component {
 
+  outside(originalImage) {
+    Image.getSize(originalImage, (w,h) =>{
+      const cropData = {
+        offset: {x:0,y:(h/4)},
+        size: {width:w,height:(h/2)}
+      }
+      ImageEditor.cropImage(originalImage, cropData,
+      (successURI) => {
+        this.props.navigator.push({
+          name: 'ViewCapture', // Matches route.name
+          imageData: successURI
+        })
+      },
+      (error) => {
+        console.log(error);
+      })
+    })
+  }
+
   takePicture() {
     this.camera.capture()
       .then((data) => {
-        this.props.navigator.push({
-          name: 'ViewCapture', // Matches route.name
-          imageData: data.path
-        })
+        this.outside(data.path);
       })
       .catch(err => console.error(err));
   }
