@@ -55,8 +55,8 @@ class CameraView extends Component {
   outside(originalImage) {
     Image.getSize(originalImage, (w,h) =>{
       const cropData = {
-        offset: {x:0,y:(h/4)},
-        size: {width:w,height:(h/2)}
+        offset: {x:0,y:((h/2) - (w/2))},
+        size: {width:w,height:w}
       }
       ImageEditor.cropImage(originalImage, cropData,
       (successURI) => {
