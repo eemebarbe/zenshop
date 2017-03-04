@@ -61,7 +61,7 @@ class CameraView extends Component {
       ImageEditor.cropImage(originalImage, cropData,
       (successURI) => {
         this.props.navigator.push({
-          name: 'ViewCapture', // Matches route.name
+          name: 'ViewCapture',
           imageData: successURI
         })
       },
@@ -89,9 +89,12 @@ class CameraView extends Component {
           style={styles.preview}
           aspect={Camera.constants.Aspect.fill}
           captureTarget={Camera.constants.CaptureTarget.disk}>
+                <View style={{width:"100%",height:((Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2)),backgroundColor:"white",position:"absolute",opacity:.5,top:0}}></View>
+          <View style={{width:"100%",height:(Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2),backgroundColor:"white",position:"absolute",opacity:.5}}>
           <TouchableHighlight onPress={this.takePicture.bind(this)}>
-            <View style={{height:50,width:50,borderColor:"pink",borderWidth:5,borderRadius:5}}></View>
+            <View style={{height:50,width:50,borderColor:"pink",borderWidth:5,borderRadius:5,marginBottom:10}}></View>
           </TouchableHighlight>
+          </View>
         </Camera>
       </View>
     );
