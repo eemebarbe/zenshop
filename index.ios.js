@@ -2,55 +2,67 @@
 import React, { Component } from 'react';
 import {
   AppRegistry,
-  Navigator,
   Dimensions,
   StyleSheet,
   Text,
   Image,
   TouchableHighlight,
   View,
+  DeviceEventEmitter,
+  NativeModules,
   ImageEditor
 } from 'react-native';
+import { StackNavigator } from 'react-navigation';
 import Camera from 'react-native-camera';
-
-
-class Navigation extends Component {
-
-  renderScene(route, navigator) {
-     if(route.name == 'CameraView') {
-       return <CameraView navigator={navigator} />
-     }
-     if(route.name == 'ViewCapture') {
-       return <ViewCapture navigator={navigator} image={route.imageData}/>
-     }
-  }
-
-
-  render() {
-    return (
-      <Navigator
-      initialRoute={{ name: 'CameraView' }}
-      renderScene={this.renderScene}
-      configureScene={(route, routeStack) =>
-      Navigator.SceneConfigs.FloatFromBottom} />
-    );
-  }
-}
 
 
 class ViewCapture extends Component {
 
+  goBack() {
+    this.props.navigation.goBack(null);
+  }
+
   render() {
+    const { params } = this.props.navigation.state;
+
     return (
       <View style={styles.container}>
-        <Image style={{width:200,height:200}} source={{uri: this.props.image}}/>
+        <Image style={{width:200,height:200}} source={{uri: params.imageData}}/>
+        <TouchableHighlight onPress={this.goBack.bind(this)}>
+          <View style={{height:50,width:50,backgroundColor:"blue"}}><Text>Try Again</Text></View>
+        </TouchableHighlight>
       </View>
+
     );
   }
 }
 
 
 class CameraView extends Component {
+
+  constructor(props) {
+      super(props);
+      this.state = {
+        x: 0,
+        y: 0,
+        z: 0,
+        angle: 0
+      };
+  }
+
+  componentWillMount() {
+    NativeModules.Accelerometer.setAccelerometerUpdateInterval(0.1);
+    DeviceEventEmitter.addListener('AccelerationData', function (data) {
+      this.setState({
+        x: data.acceleration.x,
+        y: data.acceleration.y,
+        z: data.acceleration.z,
+        angle: Math.atan2(data.gravity.x, data.gravity.y)
+      });
+    }.bind(this));
+    NativeModules.Accelerometer.startAccelerometerUpdates();
+  }
+
 
   outside(originalImage) {
     Image.getSize(originalImage, (w,h) =>{
@@ -60,10 +72,10 @@ class CameraView extends Component {
       }
       ImageEditor.cropImage(originalImage, cropData,
       (successURI) => {
-        this.props.navigator.push({
-          name: 'ViewCapture',
-          imageData: successURI
-        })
+        this.props.navigation.navigate(
+          'ViewCapture', {
+            imageData: successURI
+          })
       },
       (error) => {
         console.log(error);
@@ -89,17 +101,25 @@ class CameraView extends Component {
           style={styles.preview}
           aspect={Camera.constants.Aspect.fill}
           captureTarget={Camera.constants.CaptureTarget.disk}>
-                <View style={{width:"100%",height:((Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2)),backgroundColor:"white",position:"absolute",opacity:.5,top:0}}></View>
-          <View style={{width:"100%",height:(Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2),backgroundColor:"white",position:"absolute",opacity:.5}}>
+          <View style={{width:"100%",height:((Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2)),backgroundColor:"white",position:"absolute",opacity:.5,top:0}}></View>
+          <View style={{width:"100%",height:(Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2),backgroundColor:"white",position:"absolute",opacity:.5}}><Text>{this.state.angle}</Text></View>
           <TouchableHighlight onPress={this.takePicture.bind(this)}>
             <View style={{height:50,width:50,borderColor:"pink",borderWidth:5,borderRadius:5,marginBottom:10}}></View>
           </TouchableHighlight>
-          </View>
         </Camera>
       </View>
     );
   }
 }
+
+
+const zenshop = StackNavigator({
+  CameraView: { screen: CameraView },
+  ViewCapture: { screen: ViewCapture },
+}, {
+  initialRouteName: 'CameraView',
+  headerMode: 'none'
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -122,4 +142,4 @@ const styles = StyleSheet.create({
   }
 });
 
-AppRegistry.registerComponent('zenshop', () => Navigation);
+AppRegistry.registerComponent('zenshop', () => zenshop);
