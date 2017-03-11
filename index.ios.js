@@ -43,15 +43,12 @@ class CameraView extends Component {
   constructor(props) {
       super(props);
       this.state = {
-        x: 0,
-        y: 0,
-        z: 0,
         angleDegrees: 0
       };
   }
 
-  componentWillMount() {
-    NativeModules.DeviceMotion.setDeviceMotionUpdateInterval(0.1);
+  componentDidMount() {
+    NativeModules.DeviceMotion.setDeviceMotionUpdateInterval(0.05);
     DeviceEventEmitter.addListener('MotionData', function (data) {
       const angle = (Math.atan2(data.gravity.y, data.gravity.x) + (Math.PI));
       this.setState({
@@ -101,6 +98,7 @@ class CameraView extends Component {
           captureTarget={Camera.constants.CaptureTarget.disk}>
           <View style={{width:"100%",height:((Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2)),backgroundColor:"white",position:"absolute",opacity:.5,top:0}}></View>
           <View style={{width:"100%",height:(Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2),backgroundColor:"white",position:"absolute",opacity:.5}}><Text>{this.state.angleDegrees}</Text></View>
+          <View style={{width:"100%",height:1,backgroundColor:"white",top:-150,transform : [{rotate : '-' + this.state.angleDegrees + 'deg'}]}}></View>
           <TouchableHighlight onPress={this.takePicture.bind(this)}>
             <View style={{height:50,width:50,borderColor:"pink",borderWidth:5,borderRadius:5,marginBottom:10}}></View>
           </TouchableHighlight>
