@@ -38,6 +38,18 @@ class ViewCapture extends Component {
 }
 
 
+class AngleVisual extends Component {
+  render() {
+    const viewAngle = this.props.angleDegrees + 90;
+    return(
+      <View style={{flex:1,alignItems:'center',flexDirection:'row',position:'absolute',top:"50%"}}>
+        <View style={{width:1000,height:1,backgroundColor:"white",transform : [{rotate : '-' + viewAngle + 'deg'}]}}></View>
+      </View>
+    );
+  }
+}
+
+
 class CameraView extends Component {
 
   constructor(props) {
@@ -98,7 +110,7 @@ class CameraView extends Component {
           captureTarget={Camera.constants.CaptureTarget.disk}>
           <View style={{width:"100%",height:((Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2)),backgroundColor:"white",position:"absolute",opacity:.5,top:0}}></View>
           <View style={{width:"100%",height:(Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2),backgroundColor:"white",position:"absolute",opacity:.5}}><Text>{this.state.angleDegrees}</Text></View>
-          <View style={{width:"100%",height:1,backgroundColor:"white",top:-150,transform : [{rotate : '-' + this.state.angleDegrees + 'deg'}]}}></View>
+            <AngleVisual angleDegrees={this.state.angleDegrees} />
           <TouchableHighlight onPress={this.takePicture.bind(this)}>
             <View style={{height:50,width:50,borderColor:"pink",borderWidth:5,borderRadius:5,marginBottom:10}}></View>
           </TouchableHighlight>
