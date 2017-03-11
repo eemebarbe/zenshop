@@ -32,7 +32,6 @@ class ViewCapture extends Component {
           <View style={{height:50,width:50,backgroundColor:"blue"}}><Text>Try Again</Text></View>
         </TouchableHighlight>
       </View>
-
     );
   }
 }
@@ -42,8 +41,8 @@ class AngleVisual extends Component {
   render() {
     const viewAngle = this.props.angleDegrees + 90;
     return(
-      <View style={{flex:1,alignItems:'center',flexDirection:'row',position:'absolute',top:"50%"}}>
-        <View style={{width:1000,height:1,backgroundColor:"white",transform : [{rotate : '-' + viewAngle + 'deg'}]}}></View>
+      <View style={{flex:1,alignItems:'center',flexDirection:'row',position:'absolute',top:'50%',transform : [{translateX: this.props.zAnglePercentage*10}]}}>
+        <View style={{width:1000,height:1000,borderWidth:1,borderColor:"white",transform : [{rotate : '-' + viewAngle + 'deg'}]}}></View>
       </View>
     );
   }
@@ -63,8 +62,10 @@ class CameraView extends Component {
     NativeModules.DeviceMotion.setDeviceMotionUpdateInterval(0.05);
     DeviceEventEmitter.addListener('MotionData', function (data) {
       const angle = (Math.atan2(data.gravity.y, data.gravity.x) + (Math.PI));
+      const angle2 = (Math.atan2(data.gravity.z, data.gravity.x) + (Math.PI));
       this.setState({
-        angleDegrees: (angle * 180 / Math.PI)
+        angleDegrees: (angle * 180 / Math.PI),
+        angleDegrees2: (angle2 * 180 / Math.PI)
       });
     }.bind(this));
     NativeModules.DeviceMotion.startDeviceMotionUpdates();
@@ -73,10 +74,6 @@ class CameraView extends Component {
 
   outside(originalImage) {
     Image.getSize(originalImage, (w,h) =>{
-      const cropData = {
-        offset: {x:0,y:((h/2) - (w/2))},
-        size: {width:w,height:w}
-      }
       ImageEditor.cropImage(originalImage, cropData,
       (successURI) => {
         this.props.navigation.navigate(
@@ -99,6 +96,7 @@ class CameraView extends Component {
   }
 
   render() {
+    const zAnglePercentage = (this.state.angleDegrees2 / 180) * 100;
     return (
       <View style={styles.container}>
         <Camera
@@ -107,10 +105,10 @@ class CameraView extends Component {
           }}
           style={styles.preview}
           aspect={Camera.constants.Aspect.fill}
+          orientation={Camera.constants.Orientation.landscape}
           captureTarget={Camera.constants.CaptureTarget.disk}>
-          <View style={{width:"100%",height:((Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2)),backgroundColor:"white",position:"absolute",opacity:.5,top:0}}></View>
-          <View style={{width:"100%",height:(Dimensions.get('window').height / 2) - (Dimensions.get('window').width / 2),backgroundColor:"white",position:"absolute",opacity:.5}}><Text>{this.state.angleDegrees}</Text></View>
-            <AngleVisual angleDegrees={this.state.angleDegrees} />
+          <AngleVisual angleDegrees={this.state.angleDegrees} zAnglePercentage={zAnglePercentage} />
+          <View><Text style={{color:"white"}}>{zAnglePercentage}</Text></View>
           <TouchableHighlight onPress={this.takePicture.bind(this)}>
             <View style={{height:50,width:50,borderColor:"pink",borderWidth:5,borderRadius:5,marginBottom:10}}></View>
           </TouchableHighlight>
