@@ -41,8 +41,8 @@ class AngleVisual extends Component {
   render() {
     const viewAngle = this.props.angleDegrees + 90;
     return(
-      <View style={{flex:1,alignItems:'center',flexDirection:'row',position:'absolute',top:'50%',transform : [{translateX: this.props.zAnglePercentage*10}]}}>
-        <View style={{width:1000,height:1000,borderWidth:1,borderColor:"white",transform : [{rotate : '-' + viewAngle + 'deg'}]}}></View>
+      <View style={{alignItems:'center',flexDirection:'row',position:'absolute',top:'50%',transform : [{translateX: (this.props.zAnglePercentage -50)*10}]}}>
+        <View style={{width:1000,height:1000,position:'absolute',right:-500,borderWidth:1,borderColor:"white",transform : [{rotate : '-' + viewAngle + 'deg'}]}}></View>
       </View>
     );
   }
@@ -62,7 +62,7 @@ class CameraView extends Component {
     NativeModules.DeviceMotion.setDeviceMotionUpdateInterval(0.05);
     DeviceEventEmitter.addListener('MotionData', function (data) {
       const angle = (Math.atan2(data.gravity.y, data.gravity.x) + (Math.PI));
-      const angle2 = (Math.atan2(data.gravity.z, data.gravity.x) + (Math.PI));
+      const angle2 = (Math.atan2(data.gravity.x, data.gravity.z) + (Math.PI));
       this.setState({
         angleDegrees: (angle * 180 / Math.PI),
         angleDegrees2: (angle2 * 180 / Math.PI)
