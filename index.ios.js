@@ -24,12 +24,11 @@ class ViewCapture extends Component {
 
   render() {
     const { params } = this.props.navigation.state;
-
     return (
       <View style={styles.container}>
         <Image style={{width:200,height:200}} source={{uri: params.imageData}}/>
         <TouchableHighlight onPress={this.goBack.bind(this)}>
-          <View style={{height:50,width:50,backgroundColor:"blue"}}><Text>Try Again</Text></View>
+          <View style={styles.button}><Text>Try Again</Text></View>
         </TouchableHighlight>
       </View>
     );
@@ -38,11 +37,25 @@ class ViewCapture extends Component {
 
 
 class AngleVisual extends Component {
+  gridGenerator() {
+    const captureRange = visualizerHeight / 2;
+    return(
+      <View>
+        <View style={[styles.gridLine, {backgroundColor: 'red', height: captureRange/3}]}></View>
+        <View style={[styles.gridLine, {backgroundColor: 'white', height: captureRange/3}]}></View>        
+        <View style={[styles.gridLine, {backgroundColor: 'blue', height: captureRange/3}]}></View>
+      </View>
+    )
+  }
   render() {
     const viewAngle = this.props.angleDegrees + 90;
     return(
-      <View style={{alignItems:'center',flexDirection:'row',position:'absolute',top:'50%',transform : [{translateX: (this.props.zAnglePercentage -50)*10}]}}>
-        <View style={{width:1000,height:1000,position:'absolute',right:-500,borderWidth:1,borderColor:"white",transform : [{rotate : '-' + viewAngle + 'deg'}]}}></View>
+      <View className='visualizerContainer' style={[ styles.visualizerContainer, {transform : [{translateX: -((this.props.zAnglePercentage -50)*10)}]} ]}>
+        <View className='visualizer' style={[styles.visualizer, {transform : [{rotate : '-' + viewAngle + 'deg'}]} ]}>
+          <View className='captureRange' style={styles.captureRange}>
+            {this.gridGenerator()}
+          </View>
+        </View>
       </View>
     );
   }
@@ -100,17 +113,17 @@ class CameraView extends Component {
     return (
       <View style={styles.container}>
         <Camera
-          ref={(cam) => {
-            this.camera = cam;
-          }}
-          style={styles.preview}
-          aspect={Camera.constants.Aspect.fill}
-          orientation={Camera.constants.Orientation.landscape}
-          captureTarget={Camera.constants.CaptureTarget.disk}>
+        ref={(cam) => { this.camera = cam; }}
+        style={styles.preview}
+        aspect={Camera.constants.Aspect.fill}
+        orientation={Camera.constants.Orientation.landscape}
+        captureTarget={Camera.constants.CaptureTarget.disk}>
           <AngleVisual angleDegrees={this.state.angleDegrees} zAnglePercentage={zAnglePercentage} />
-          <View><Text style={{color:"white"}}>{zAnglePercentage}</Text></View>
+          <View>
+            <Text style={{color:"white"}}>{zAnglePercentage}</Text>
+          </View>
           <TouchableHighlight onPress={this.takePicture.bind(this)}>
-            <View style={{height:50,width:50,borderColor:"pink",borderWidth:5,borderRadius:5,marginBottom:10}}></View>
+            <View style={styles.cameraShutter}></View>
           </TouchableHighlight>
         </Camera>
       </View>
@@ -127,7 +140,32 @@ const zenshop = StackNavigator({
   headerMode: 'none'
 });
 
+const visualizerHeight = 1000;
 const styles = StyleSheet.create({
+  visualizerContainer : {
+    alignItems: 'center',
+    flexDirection: 'row',
+    position: 'absolute',
+    top: '50%'
+  },
+  visualizer : {
+    width: 1000,
+    height: visualizerHeight,
+    position: 'absolute',
+    right: -500
+  },
+  captureRange: {
+    height: (visualizerHeight / 2),
+    marginTop: (visualizerHeight / 4),
+    marginBottom: (visualizerHeight / 4),
+    borderWidth: 1,
+    borderColor: 'red'
+  },
+  gridLine: {
+    width: '100%',
+    height: 1,
+    backgroundColor: 'white'
+  },
   container: {
     flex: 1
   },
@@ -145,6 +183,19 @@ const styles = StyleSheet.create({
     color: '#000',
     padding: 10,
     margin: 40
+  },
+  button: {
+    height:50,
+    width:50,
+    backgroundColor:"blue"
+  },
+  cameraShutter: {
+    height:50,
+    width:50,
+    borderColor:"pink",
+    borderWidth:5,
+    borderRadius:5,
+    marginBottom:10
   }
 });
 
