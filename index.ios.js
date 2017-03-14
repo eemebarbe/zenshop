@@ -37,13 +37,25 @@ class ViewCapture extends Component {
 
 
 class AngleVisual extends Component {
-  gridGenerator() {
+  gridGenerator(numberOfLines) {
     const captureRange = visualizerHeight / 2;
+    const numberOfDivisions = (numberOfLines - 1)*2;
+    const divisionSize = captureRange / numberOfDivisions;
+    const middle = [];
+        for(var i=0;i<(numberOfLines-2);i++){
+            middle.push(<View style={[styles.gridLine, {height: divisionSize*2}]}>
+              <View style={{height:1,width:'100%',top:'50%',backgroundColor:'pink'}}></View>
+            </View>)
+        }
     return(
       <View>
-        <View style={[styles.gridLine, {backgroundColor: 'red', height: captureRange/3}]}></View>
-        <View style={[styles.gridLine, {backgroundColor: 'white', height: captureRange/3}]}></View>        
-        <View style={[styles.gridLine, {backgroundColor: 'blue', height: captureRange/3}]}></View>
+        <View style={[styles.gridLine, {height: divisionSize}]}>
+          <View style={{height:1,width:'100%',top:0,backgroundColor:'yellow'}}></View>
+        </View>
+        {middle}
+        <View style={[styles.gridLine, {height: divisionSize}]}>
+          <View style={{height:1,width:'100%',top:'100%',backgroundColor:'yellow'}}></View>
+        </View>
       </View>
     )
   }
@@ -53,7 +65,7 @@ class AngleVisual extends Component {
       <View className='visualizerContainer' style={[ styles.visualizerContainer, {transform : [{translateX: -((this.props.zAnglePercentage -50)*10)}]} ]}>
         <View className='visualizer' style={[styles.visualizer, {transform : [{rotate : '-' + viewAngle + 'deg'}]} ]}>
           <View className='captureRange' style={styles.captureRange}>
-            {this.gridGenerator()}
+          {this.gridGenerator(5)}
           </View>
         </View>
       </View>
@@ -152,19 +164,20 @@ const styles = StyleSheet.create({
     width: 1000,
     height: visualizerHeight,
     position: 'absolute',
+    borderColor: 'purple',
+    borderWidth: 1,
     right: -500
   },
   captureRange: {
-    height: (visualizerHeight / 2),
-    marginTop: (visualizerHeight / 4),
-    marginBottom: (visualizerHeight / 4),
+    height: visualizerHeight / 2,
+    marginBottom: visualizerHeight / 4,
+    marginTop: visualizerHeight / 4,
     borderWidth: 1,
     borderColor: 'red'
   },
   gridLine: {
     width: '100%',
-    height: 1,
-    backgroundColor: 'white'
+    height: 1
   },
   container: {
     flex: 1
