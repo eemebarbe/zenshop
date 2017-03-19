@@ -16,17 +16,6 @@ import { StackNavigator } from 'react-navigation';
 import Camera from 'react-native-camera';
 
 
-class Settings extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <View></View>
-      </View>
-    );
-  }
-}
-
-
 
 class ViewOverlay extends Component {
 
@@ -38,7 +27,6 @@ class ViewOverlay extends Component {
     );
   }
 }
-
 
 
 class ViewCapture extends Component {
@@ -61,46 +49,22 @@ class ViewCapture extends Component {
 }
 
 
-
 class AngleVisual extends Component {
 
   gridGenerator() {
-    const totalRange = 180;
-    const middleRangeDecimal = this.props.middleRange / totalRange;
-    const captureRange = visualizerHeight * middleRangeDecimal;
-    const numberOfDivisions = (this.props.numberOfLines - 1) * 2;
-    const divisionSize = captureRange / numberOfDivisions;
-    const middle = [];
-    for(var i=0;i<(this.props.numberOfLines-2);i++){
-        middle.push(<View style={[styles.gridLine, {height: divisionSize*2}]}>
-                      <View style={{height:1,width:'100%',top:'50%',backgroundColor:'pink'}}></View>
-                    </View>)
-    }
-    return(
-      <View>
-        <View style={[styles.gridLine, {height: divisionSize}]}>
-          <View style={{height:1,width:'100%',top:0,backgroundColor:'blue'}}></View>
-        </View>
-        {middle}
-        <View style={[styles.gridLine, {height: divisionSize}]}>
-          <View style={{height:1,width:'100%',top:'100%',backgroundColor:'yellow'}}></View>
-        </View>
-      </View>
-    )
-  }
-
-  gridGenerator() {
-    const totalRange = 180;
-    const middleRangeDecimal = this.props.middleRange / totalRange;
-    const captureRange = visualizerHeight * middleRangeDecimal;
-    const numberOfDivisions = this.props.numberOfLines - 1;
-    const divisionSize = captureRange / numberOfDivisions;
+        const remainder = 180 - this.props.middleRange;
+        const remainderDecimal = remainder / 180; 
+        const margin = remainderDecimal / 2;
+        //amount of total range that the middle range takes up in decimal
+    const middleRangeDecimal = this.props.middleRange / 180;
     const middle = [];
     for(var i=0;i<this.props.numberOfLines;i++){
         middle.push( <View style={{height:1,width:'100%',backgroundColor:'pink'}}></View> )
     }
     return(
-      <View className='captureRange' style={styles.captureRange}>
+      <View className='captureRange' style={[styles.captureRange,{ height: visualizerHeight * middleRangeDecimal,
+    marginBottom: visualizerHeight * margin,
+    marginTop: visualizerHeight * margin}]}>
         {middle}
       </View>
     )
@@ -128,8 +92,8 @@ class CameraView extends Component {
       this.state = {
         angleDegrees: 0,
         angleDegrees2: 0,
-        middleRange : 45,
-        numberOfLines : 7
+        middleRange : 90,
+        numberOfLines : 5
       };
   }
 
@@ -186,7 +150,7 @@ class CameraView extends Component {
         orientation={Camera.constants.Orientation.landscape}
         captureTarget={Camera.constants.CaptureTarget.disk}>
           <ViewOverlay />
-          <AngleVisual angleDegrees={this.state.angleDegrees} angleDegrees2={this.state.angleDegrees2} zAnglePercentage={zAnglePercentage} middleRange={this.state.middleRange} numberOfLines={this.state.numberOfLines} />
+          <AngleVisual angleDegrees={this.state.angleDegrees} zAnglePercentage={zAnglePercentage} middleRange={this.state.middleRange} numberOfLines={this.state.numberOfLines} />
           <View>
             <Text style={{color:"white"}}>{zAnglePercentage}</Text>
           </View>
@@ -231,10 +195,7 @@ const styles = StyleSheet.create({
   captureRange: {
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'space-between',
-    height: visualizerHeight / 2,
-    marginBottom: visualizerHeight / 4,
-    marginTop: visualizerHeight / 4
+    justifyContent: 'space-between'
   },
   gridLine: {
     width: '100%',
