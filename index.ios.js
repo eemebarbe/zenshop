@@ -16,6 +16,31 @@ import { StackNavigator } from 'react-navigation';
 import Camera from 'react-native-camera';
 
 
+class Settings extends Component {
+  render() {
+    return (
+      <View style={styles.container}>
+        <View></View>
+      </View>
+    );
+  }
+}
+
+
+
+class ViewOverlay extends Component {
+
+  render() {
+    return (
+      <View style={styles.visualizerContainer}>
+        <View style={styles.fixedLine}></View>
+      </View>
+    );
+  }
+}
+
+
+
 class ViewCapture extends Component {
 
   goBack() {
@@ -36,56 +61,21 @@ class ViewCapture extends Component {
 }
 
 
+
 class AngleVisual extends Component {
 
-  constructor(props) {
-      super(props);
-      this.state = {
-        middleRange : 90,
-        numberOfLines : 5
-      };
-  }
-
-  componentDidMount(){
+  gridGenerator() {
     const totalRange = 180;
-    //amount of total range that the middle range takes up in decimal
-    const middleRangeDecimal = this.state.middleRange / totalRange;
-    const remainder = totalRange - this.state.middleRange;
-    //bottom point of middle range in degrees
-    var bottom = remainder / 2;
-    const top = totalRange - bottom;
-    const numberOfDivisionsVirtual = this.state.numberOfLines - 1;
-    const divisionSizeVirtual = this.state.middleRange / numberOfDivisionsVirtual;
-    var self = this;
-    setInterval(function(){ 
-      var i = 0;
-      if(i < numberOfDivisionsVirtual) {
-        if(self.props.angleDegrees2 > (bottom - .1) && self.props.angleDegrees2 < (bottom + .1)){
-          alert(bottom);
-          i++;
-          bottom = bottom + divisionSizeVirtual;
-        }
-      }
-    }, 500); 
-  }
-
-  gridGenerator(numberOfLines) {
-    const totalRange = 180;
-    //range that grid lines will be rendered
-    const middleRange = 90;
-    //amount of total range that the middle range takes up in decimal
-    const middleRangeDecimal = middleRange / totalRange;
-    //total capture range in pixels
+    const middleRangeDecimal = this.props.middleRange / totalRange;
     const captureRange = visualizerHeight * middleRangeDecimal;
-    const numberOfDivisions = (numberOfLines - 1) * 2;
+    const numberOfDivisions = (this.props.numberOfLines - 1) * 2;
     const divisionSize = captureRange / numberOfDivisions;
-
     const middle = [];
-        for(var i=0;i<(numberOfLines-2);i++){
-            middle.push(<View style={[styles.gridLine, {height: divisionSize*2}]}>
-                          <View style={{height:1,width:'100%',top:'50%',backgroundColor:'pink'}}></View>
-                        </View>)
-        }
+    for(var i=0;i<(this.props.numberOfLines-2);i++){
+        middle.push(<View style={[styles.gridLine, {height: divisionSize*2}]}>
+                      <View style={{height:1,width:'100%',top:'50%',backgroundColor:'pink'}}></View>
+                    </View>)
+    }
     return(
       <View>
         <View style={[styles.gridLine, {height: divisionSize}]}>
@@ -97,18 +87,32 @@ class AngleVisual extends Component {
         </View>
       </View>
     )
-
-
   }
+
+  gridGenerator() {
+    const totalRange = 180;
+    const middleRangeDecimal = this.props.middleRange / totalRange;
+    const captureRange = visualizerHeight * middleRangeDecimal;
+    const numberOfDivisions = this.props.numberOfLines - 1;
+    const divisionSize = captureRange / numberOfDivisions;
+    const middle = [];
+    for(var i=0;i<this.props.numberOfLines;i++){
+        middle.push( <View style={{height:1,width:'100%',backgroundColor:'pink'}}></View> )
+    }
+    return(
+      <View className='captureRange' style={styles.captureRange}>
+        {middle}
+      </View>
+    )
+  }
+
   render() {
     //orient the grid visualization to the correct side
     const viewAngle = this.props.angleDegrees + 270;
     return(
-      <View className='visualizerContainer' style={[ styles.visualizerContainer, {transform : [{translateX: -((this.props.zAnglePercentage -50)*10)}]} ]}>
+      <View className='visualizerContainer' style={[ styles.visualizerContainer, {transform : [{translateX: -((this.props.zAnglePercentage -50)*(visualizerHeight/100))}]} ]}>
         <View className='visualizer' style={[styles.visualizer, {transform : [{rotate : '-' + viewAngle + 'deg'}]} ]}>
-          <View className='captureRange' style={styles.captureRange}>
-          {this.gridGenerator(5)}
-          </View>
+          {this.gridGenerator()}
         </View>
       </View>
     );
@@ -116,17 +120,31 @@ class AngleVisual extends Component {
 }
 
 
+
 class CameraView extends Component {
 
   constructor(props) {
       super(props);
       this.state = {
-        angleDegrees: 0
+        angleDegrees: 0,
+        angleDegrees2: 0,
+        middleRange : 45,
+        numberOfLines : 7
       };
   }
 
   componentDidMount() {
-    NativeModules.DeviceMotion.setDeviceMotionUpdateInterval(0.05);
+
+    var i = 0;
+    const totalRange = 180;
+    const remainder = totalRange - this.state.middleRange;
+    //bottom point of middle range in degrees
+    var bottom = remainder / 2;
+    const top = totalRange - bottom;
+    const numberOfDivisionsVirtual = this.state.numberOfLines - 1;
+    const divisionSizeVirtual = this.state.middleRange / numberOfDivisionsVirtual;
+
+    NativeModules.DeviceMotion.setDeviceMotionUpdateInterval(0.085);
     DeviceEventEmitter.addListener('MotionData', function (data) {
       const angle = (Math.atan2(data.gravity.y, data.gravity.x) + (Math.PI));
       const angle2 = (Math.atan2(data.gravity.x, data.gravity.z) + (Math.PI));
@@ -134,6 +152,13 @@ class CameraView extends Component {
         angleDegrees: (angle * 180 / Math.PI),
         angleDegrees2: (angle2 * 180 / Math.PI)
       });
+      if(i < this.state.numberOfLines) {
+        if(this.state.angleDegrees2 > (bottom - .1) && this.state.angleDegrees2 < (bottom + .1)){
+          i++;
+          alert(bottom);//replace with picture capture
+          bottom = bottom + divisionSizeVirtual;
+        }
+      }
     }.bind(this));
     NativeModules.DeviceMotion.startDeviceMotionUpdates();
   }
@@ -150,12 +175,6 @@ class CameraView extends Component {
       .catch(err => console.error(err));
   }
 
-  selectGridline(numberOfLines) {
-    if(zAnglePercentage < 30){
-      this.takePicture();
-    }
-  }
-
   render() {
     const zAnglePercentage = (this.state.angleDegrees2 / 180) * 100;
     return (
@@ -166,7 +185,8 @@ class CameraView extends Component {
         aspect={Camera.constants.Aspect.fill}
         orientation={Camera.constants.Orientation.landscape}
         captureTarget={Camera.constants.CaptureTarget.disk}>
-          <AngleVisual angleDegrees={this.state.angleDegrees} angleDegrees2={this.state.angleDegrees2} zAnglePercentage={zAnglePercentage} />
+          <ViewOverlay />
+          <AngleVisual angleDegrees={this.state.angleDegrees} angleDegrees2={this.state.angleDegrees2} zAnglePercentage={zAnglePercentage} middleRange={this.state.middleRange} numberOfLines={this.state.numberOfLines} />
           <View>
             <Text style={{color:"white"}}>{zAnglePercentage}</Text>
           </View>
@@ -180,6 +200,9 @@ class CameraView extends Component {
 }
 
 
+
+
+
 const zenshop = StackNavigator({
   CameraView: { screen: CameraView },
   ViewCapture: { screen: ViewCapture },
@@ -188,7 +211,10 @@ const zenshop = StackNavigator({
   headerMode: 'none'
 });
 
-const visualizerHeight = 1000;
+
+
+
+const visualizerHeight = 3000;
 const styles = StyleSheet.create({
   visualizerContainer : {
     alignItems: 'center',
@@ -203,6 +229,9 @@ const styles = StyleSheet.create({
     right: -500
   },
   captureRange: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     height: visualizerHeight / 2,
     marginBottom: visualizerHeight / 4,
     marginTop: visualizerHeight / 4
@@ -210,6 +239,12 @@ const styles = StyleSheet.create({
   gridLine: {
     width: '100%',
     height: 1
+  },
+  fixedLine: {
+    width: '100%',
+    height: 3,
+    backgroundColor: 'white',
+    transform : [{rotate : '90deg'}]
   },
   container: {
     flex: 1
