@@ -1,0 +1,18 @@
+export class ViewCapture extends Component {
+
+  goBack() {
+    this.props.navigation.goBack(null);
+  }
+
+  render() {
+    const { params } = this.props.navigation.state;
+    return (
+      <View style={styles.container}>
+        <Image style={{width:200,height:200}} source={{uri: params.imageData}}/>
+        <TouchableHighlight onPress={this.goBack.bind(this)}>
+          <View style={styles.button}><Text>Try Again</Text></View>
+        </TouchableHighlight>
+      </View>
+    );
+  }
+}
