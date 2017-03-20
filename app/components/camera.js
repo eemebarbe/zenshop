@@ -108,8 +108,9 @@ export class CameraView extends Component {
           bottom = bottom + divisionSizeVirtual;
         }
       } else if (i === this.state.numberOfLines) {
+        NativeModules.DeviceMotion.stopDeviceMotionUpdates();
         this.props.navigation.navigate(
-          'ViewCapture', { images: this.state.images }
+          'ViewCapture',  [ this.state.images ]
         )
       }
     }.bind(this));
@@ -140,12 +141,6 @@ export class CameraView extends Component {
         captureTarget={Camera.constants.CaptureTarget.disk}>
           <ViewOverlay />
           <AngleVisual angleDegrees={this.state.angleDegrees} zAnglePercentage={zAnglePercentage} middleRange={this.state.middleRange} numberOfLines={this.state.numberOfLines} />
-          <View>
-            <Text style={{color:"white"}}>{zAnglePercentage}</Text>
-          </View>
-          <TouchableHighlight onPress={this.takePicture.bind(this)}>
-            <View style={styles.cameraShutter}></View>
-          </TouchableHighlight>
         </Camera>
       </View>
     );

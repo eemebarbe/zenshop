@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Switch,
   Button
 } from 'react-native';
 import { StackNavigator } from 'react-navigation';
@@ -63,7 +64,11 @@ export class Settings extends Component {
               <Text style={styles.selectedNumber}>{this.state.degrees}</Text>
               <Button title="More" color={darkColor} onPress={() => this.changeDegrees("more")} />
             </Box>
-            <View style={styles.getStarted}>
+            <View style={styles.UIGeneral}>
+              <Text style={styles.instructions}>Include Instructions</Text>
+              <Switch style={styles.switch} />
+            </View>
+            <View style={[styles.UIGeneral, styles.getStarted]}>
               <Button title="Let's get started!" color="white" onPress={() => this.toCamera()} />
             </View>
       </View>
@@ -76,7 +81,7 @@ export class Box extends Component {
 
   render() {
     return (
-        <View style={styles.box}>
+        <View style={[styles.box]}>
           <View style={styles.boxTitle}>
             <Text style={styles.boxTitleText}>{this.props.title}</Text>
           </View>
@@ -90,6 +95,7 @@ export class Box extends Component {
 
 const darkColor = "#4E3A5E";
 const marginSize = 20;
+const borderRad = 5;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -99,6 +105,8 @@ const styles = StyleSheet.create({
   },
   boxContent: {
     flexDirection: "row",
+    borderBottomLeftRadius: borderRad,
+    borderBottomRightRadius: borderRad,
     justifyContent: "center",
     alignItems: 'center',
     padding: marginSize,
@@ -115,22 +123,39 @@ const styles = StyleSheet.create({
   },
   box: {
     width: (Dimensions.get('window').width) * .9,
-    height: 150,
     margin: marginSize,
     marginBottom: 0,
     borderWidth: 1,
+    borderRadius: borderRad,
     borderColor: darkColor,
   },
   selectedNumber: {
-    fontSize: 40
+    textAlign: "center",
+    fontSize: 40,
+    width: 75,
+    marginLeft: 20,
+    marginRight: 20
   },
-  getStarted: {
+  UIGeneral: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: 'center',
     width: (Dimensions.get('window').width) * .9,
-    backgroundColor: darkColor,
+    backgroundColor: "white",
     borderWidth: 1,
+    borderRadius: borderRad,
     padding: marginSize,
     margin: marginSize,
     marginBottom: 0,
     borderColor: darkColor
+  },
+  getStarted: {
+    backgroundColor: darkColor
+  },
+  switch: {
+    marginLeft: 20
+  },
+  instructions: {
+    color: "purple"
   }
 });
