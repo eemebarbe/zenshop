@@ -59,7 +59,7 @@ export class Settings extends Component {
             <Text style={styles.selectedNumber}>{this.state.numberOfGridlines}</Text>
             <Button title="More" color={darkColor} onPress={() => this.changeGrid("more")} />
             </Box>
-            <Box title={"Total range:"}>
+            <Box title={"Total range (in degrees):"}>
               <Button title="Less" color={darkColor} onPress={() => this.changeDegrees("less")} />
               <Text style={styles.selectedNumber}>{this.state.degrees}</Text>
               <Button title="More" color={darkColor} onPress={() => this.changeDegrees("more")} />
@@ -96,6 +96,7 @@ export class Box extends Component {
 const darkColor = "#4E3A5E";
 const marginSize = 20;
 const borderRad = 5;
+const borderWid = 1;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -110,11 +111,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: 'center',
     padding: marginSize,
+    height: 80,
     backgroundColor: "white"
   },
   boxTitle: {
     padding: marginSize,
     backgroundColor: darkColor,
+    height: 60,
     flexDirection: "row",
     justifyContent: "center"
   },
@@ -125,7 +128,7 @@ const styles = StyleSheet.create({
     width: (Dimensions.get('window').width) * .9,
     margin: marginSize,
     marginBottom: 0,
-    borderWidth: 1,
+    borderWidth: borderWid,
     borderRadius: borderRad,
     borderColor: darkColor,
   },
@@ -138,11 +141,12 @@ const styles = StyleSheet.create({
   },
   UIGeneral: {
     flexDirection: "row",
+    minHeight: 80,
     justifyContent: "center",
     alignItems: 'center',
     width: (Dimensions.get('window').width) * .9,
     backgroundColor: "white",
-    borderWidth: 1,
+    borderWidth: borderWid,
     borderRadius: borderRad,
     padding: marginSize,
     margin: marginSize,
@@ -150,12 +154,13 @@ const styles = StyleSheet.create({
     borderColor: darkColor
   },
   getStarted: {
-    backgroundColor: darkColor
+    backgroundColor: darkColor,
+    height: 80
   },
   switch: {
     marginLeft: 20
   },
   instructions: {
-    color: "purple"
+    color: "purple",
   }
 });

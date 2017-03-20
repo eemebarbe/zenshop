@@ -4,28 +4,50 @@ import {
   StyleSheet,
   Text,
   Image,
-  TouchableHighlight,
   View,
-  NativeModules
+  Button,
+  Dimensions,
+  ScrollView
 } from 'react-native';
 import { StackNavigator } from 'react-navigation';
-
+import RNFS from 'react-native-fs';
 
 export class ViewCapture extends Component {
 
   goBack() {
     this.props.navigation.goBack(null);
+    this.deleteImages();
+  }
+
+  deleteImages() {
+        // create a path you want to delete
+    const { params } = this.props.navigation.state;
+    var path = RNFS.DocumentDirectoryPath + '/test.txt';
+    params.images.map((thisImage) => {
+      return RNFS.unlink(thisImage)
+        .then(() => {
+          console.log('FILE DELETED');
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    })
   }
 
   render() {
     const { params } = this.props.navigation.state;
+    const renderImages = params.images.map((thisImage) => {
+      return(
+        <Image style={{width:Dimensions.get('window').width,height:Dimensions.get('window').width/2}} resizeMode={Image.resizeMode.contain} source={{uri: thisImage}}/>
+      )
+    });
     return (
+      <ScrollView>
       <View style={styles.container}>
-        <Image style={{width:200,height:200}} source={{uri: params.images}}/>
-        <TouchableHighlight onPress={this.goBack.bind(this)}>
-          <View style={styles.button}><Text>Try Again</Text></View>
-        </TouchableHighlight>
+        {renderImages}
+        <Button title="Try Again" onPress={this.goBack.bind(this)} />
       </View>
+      </ScrollView>
     );
   }
 }
@@ -34,10 +56,5 @@ export class ViewCapture extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1
-  },
-  button: {
-    height:50,
-    width:50,
-    backgroundColor:"blue"
   }
 });
