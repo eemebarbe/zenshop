@@ -75,8 +75,15 @@ export class CameraView extends Component {
       };
   }
 
-  componentDidMount() {
+  componentWillMount() {
+    const { params } = this.props.navigation.state;
+    this.setState({
+      numberOfLines: params.numberOfGridlines,
+      middleRange: params.degrees
+    });
+  }
 
+  componentDidMount() {
     var i = 0;
     const totalRange = 180;
     const remainder = totalRange - this.state.middleRange;

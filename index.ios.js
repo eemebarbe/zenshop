@@ -1,14 +1,23 @@
 'use strict';
-import StackNavigator from 'react-navigation';
-import { ViewOverlay, AngleVisual, CameraView } from 'components/camera.jsx';
-import ViewCapture from 'components/viewcapture.jsx';
+import React, { Component } from 'react';
+import {
+  AppRegistry
+} from 'react-native';
+import { StackNavigator } from 'react-navigation';
+import Camera from 'react-native-camera';
+import { CameraView } from './app/components/camera.js';
+import { ViewCapture } from './app/components/viewcapture.js';
+import { Settings } from './app/components/settings.js'
+
 
 const zenshop = StackNavigator({
   CameraView: { screen: CameraView },
   ViewCapture: { screen: ViewCapture },
+  Settings: { screen: Settings }
 }, {
-  initialRouteName: 'CameraView',
+  initialRouteName: 'Settings',
   headerMode: 'none'
 });
+
 
 AppRegistry.registerComponent('zenshop', () => zenshop);
