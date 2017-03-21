@@ -29,7 +29,7 @@ export class AngleVisual extends Component {
     const middleRangeDecimal = this.props.middleRange / 180;
     const middle = [];
     for(var i=0;i<this.props.numberOfLines;i++){
-        middle.push( <View style={{height:1,width:'100%',backgroundColor:'pink'}}></View> )
+        middle.unshift( <View style={this.props.activeGridLine === i ? styles.gridLineActive : styles.gridLine}></View> )
     }
     return(
       <View className='captureRange' style={[styles.captureRange,{ height: visualizerHeight * middleRangeDecimal,
@@ -74,8 +74,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   gridLine: {
-    width: '100%',
-    height: 1
+    height:1,
+    width:'100%',
+    backgroundColor:'gray'
+  },
+  gridLineActive: {
+    height:1,
+    width:'100%',
+    backgroundColor: 'yellow'
   },
   fixedLine: {
     width: '100%',

@@ -21,7 +21,8 @@ export class CameraView extends Component {
         angleDegrees2: 0,
         middleRange : 90,
         numberOfLines : 5,
-        images : []
+        images : [],
+        activeGridLine : 0
       };
   }
 
@@ -34,7 +35,6 @@ export class CameraView extends Component {
   }
 
   componentDidMount() {
-    var i = 0;
     const remainder = 180 - this.state.middleRange;
     //bottom point of middle range in degrees
     var bottom = remainder / 2;
@@ -53,18 +53,15 @@ export class CameraView extends Component {
         angleDegrees2: (angle2 * 180 / Math.PI)
       });
       //if there are still grid lines to be used
-      if(i < this.state.numberOfLines) {
+      if(this.state.activeGridLine < this.state.numberOfLines) {
         //if camera is pointed at the correct angle (within reason)
         if(this.state.angleDegrees2 > (bottom - .1) && this.state.angleDegrees2 < (bottom + .1)){
-          i++;
           this.takePicture();
+          this.setState({
+            activeGridLine : this.state.activeGridLine + 1
+          });
           bottom = bottom + divisionSizeVirtual;
         }
-      } else if (i === this.state.numberOfLines) {
-        NativeModules.DeviceMotion.stopDeviceMotionUpdates();
-        this.props.navigation.navigate(
-          'ViewCapture',  { images: this.state.images }
-        )
       }
     }.bind(this));
 
@@ -80,6 +77,12 @@ export class CameraView extends Component {
         this.setState({
           images: array
         });
+        if (this.state.activeGridLine === this.state.numberOfLines) {
+          NativeModules.DeviceMotion.stopDeviceMotionUpdates();
+          this.props.navigation.navigate(
+            'ViewCapture',  { images: this.state.images }
+          )
+        }
       })
       .catch(err => console.error(err));
   }
@@ -93,10 +96,10 @@ export class CameraView extends Component {
         ref={(cam) => { this.camera = cam; }}
         style={styles.preview}
         aspect={Camera.constants.Aspect.fill}
-        orientation={Camera.constants.Orientation.landscape}
+        orientation={Camera.constants.Orientation.portrait}
         captureTarget={Camera.constants.CaptureTarget.disk}>
           <ViewOverlay />
-          <AngleVisual angleDegrees={this.state.angleDegrees} zAnglePercentage={zAnglePercentage} middleRange={this.state.middleRange} numberOfLines={this.state.numberOfLines} />
+          <AngleVisual activeGridLine={this.state.activeGridLine} angleDegrees={this.state.angleDegrees} zAnglePercentage={zAnglePercentage} middleRange={this.state.middleRange} numberOfLines={this.state.numberOfLines} />
         </Camera>
       </View>
     );
@@ -118,7 +121,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     height: Dimensions.get('window').height,
-    width: Dimensions.get('window').width
+    width: Dimensions.get('window').width,
   },
   cameraShutter: {
     height:50,
