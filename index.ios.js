@@ -16,7 +16,12 @@ const zenshop = StackNavigator({
   Settings: { screen: Settings }
 }, {
   initialRouteName: 'Settings',
-  headerMode: 'none'
+  headerMode: 'none',
+  navigationOptions: {
+  	cardStack : {
+  		gesturesEnabled : false
+  	}
+  }
 });
 
 

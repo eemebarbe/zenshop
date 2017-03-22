@@ -22,7 +22,8 @@ export class CameraView extends Component {
         middleRange : 90,
         numberOfLines : 5,
         images : [],
-        activeGridLine : 0
+        activeGridLine : 0,
+        showVisualizer: true
       };
   }
 
@@ -35,6 +36,10 @@ export class CameraView extends Component {
   }
 
   componentDidMount() {
+    this.startMotion();
+  }
+
+  startMotion() {
     const remainder = 180 - this.state.middleRange;
     //bottom point of middle range in degrees
     var bottom = remainder / 2;
@@ -68,7 +73,6 @@ export class CameraView extends Component {
     NativeModules.DeviceMotion.startDeviceMotionUpdates();
   }
 
-
   takePicture() {
     this.camera.capture()
       .then((data) => {
@@ -77,8 +81,12 @@ export class CameraView extends Component {
         this.setState({
           images: array
         });
+        //if all images needed have been taken
         if (this.state.activeGridLine === this.state.numberOfLines) {
           NativeModules.DeviceMotion.stopDeviceMotionUpdates();
+          this.setState({
+            showVisualizer : false
+          });
           this.props.navigation.navigate(
             'ViewCapture',  { images: this.state.images }
           )
@@ -96,11 +104,19 @@ export class CameraView extends Component {
         ref={(cam) => { this.camera = cam; }}
         style={styles.preview}
         aspect={Camera.constants.Aspect.fill}
-        orientation={Camera.constants.Orientation.portrait}
-        captureTarget={Camera.constants.CaptureTarget.disk}>
+        orientation={Camera.constants.Orientation.landscapeRight}
+        captureTarget={Camera.constants.CaptureTarget.disk} />
+        <View style={styles.preview2}>
           <ViewOverlay />
-          <AngleVisual activeGridLine={this.state.activeGridLine} angleDegrees={this.state.angleDegrees} zAnglePercentage={zAnglePercentage} middleRange={this.state.middleRange} numberOfLines={this.state.numberOfLines} />
-        </Camera>
+          { !this.state.showVisualizer ? null :
+          <AngleVisual
+           activeGridLine={this.state.activeGridLine} 
+           angleDegrees={this.state.angleDegrees} 
+           zAnglePercentage={zAnglePercentage} 
+           middleRange={this.state.middleRange} 
+           numberOfLines={this.state.numberOfLines} />
+          }
+        </View>
       </View>
     );
   }
@@ -120,16 +136,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',
-    height: Dimensions.get('window').height,
-    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').width,
+    width: Dimensions.get('window').height,
+    transform : [{rotate : '90deg'}]
   },
-  cameraShutter: {
-    height:50,
-    width:50,
-    borderColor:"pink",
-    borderWidth:5,
-    borderRadius:5,
-    marginBottom:10
+    preview2: {
+    position: 'absolute',
+    flex: 1,
+    alignItems: 'center',
+    height: Dimensions.get('window').height,
+    width: Dimensions.get('window').width
   }
 });
 

@@ -9,13 +9,19 @@ import {
   Dimensions,
   ScrollView
 } from 'react-native';
-import { StackNavigator } from 'react-navigation';
+import { StackNavigator, NavigationActions } from 'react-navigation';
 import RNFS from 'react-native-fs';
 
 export class ViewCapture extends Component {
 
   goBack() {
-    this.props.navigation.goBack(null);
+    const resetAction = NavigationActions.reset({
+      index: 0,
+      actions: [
+      NavigationActions.navigate({ routeName: 'Settings'})
+      ]
+    })
+    this.props.navigation.dispatch(resetAction);
     this.deleteImages();
   }
 
