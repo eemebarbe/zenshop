@@ -39,36 +39,36 @@ export class CameraView extends Component {
     this.startMotion();
   }
 
-  startMotion() {
+  listener(data) {
     const remainder = 180 - this.state.middleRange;
     //bottom point of middle range in degrees
     var bottom = remainder / 2;
     const top = 180 - bottom;
     const numberOfDivisionsVirtual = this.state.numberOfLines - 1;
     const divisionSizeVirtual = this.state.middleRange / numberOfDivisionsVirtual;
+    const angle = (Math.atan2(data.gravity.y, data.gravity.x) + (Math.PI));
+    const angle2 = (Math.atan2(data.gravity.x, data.gravity.z) + (Math.PI));
 
-    NativeModules.DeviceMotion.setDeviceMotionUpdateInterval(0.085);
-
-    DeviceEventEmitter.addListener('MotionData', function (data) {
-      const angle = (Math.atan2(data.gravity.y, data.gravity.x) + (Math.PI));
-      const angle2 = (Math.atan2(data.gravity.x, data.gravity.z) + (Math.PI));
-
-      this.setState({
-        angleDegrees: (angle * 180 / Math.PI),
-        angleDegrees2: (angle2 * 180 / Math.PI)
-      });
-      //if there are still grid lines to be used
-      if(this.state.activeGridLine < this.state.numberOfLines) {
-        //if camera is pointed at the correct angle (within reason)
-        if(this.state.angleDegrees2 > (bottom - .1) && this.state.angleDegrees2 < (bottom + .1)){
-          this.takePicture();
-          this.setState({
-            activeGridLine : this.state.activeGridLine + 1
-          });
-          bottom = bottom + divisionSizeVirtual;
-        }
+    this.setState({
+      angleDegrees: (angle * 180 / Math.PI),
+      angleDegrees2: (angle2 * 180 / Math.PI)
+    });
+    //if there are still grid lines to be used
+    if(this.state.activeGridLine < this.state.numberOfLines) {
+      //if camera is pointed at the correct angle (within reason)
+      if(this.state.angleDegrees2 > (bottom - .1) && this.state.angleDegrees2 < (bottom + .1)){
+        this.takePicture();
+        this.setState({
+          activeGridLine : this.state.activeGridLine + 1
+        });
+        bottom = bottom + divisionSizeVirtual;
       }
-    }.bind(this));
+    }
+  }
+
+  startMotion() {
+    NativeModules.DeviceMotion.setDeviceMotionUpdateInterval(0.085);
+    DeviceEventEmitter.addListener('MotionData', () => this.listener(data));
 
     NativeModules.DeviceMotion.startDeviceMotionUpdates();
   }
@@ -83,6 +83,7 @@ export class CameraView extends Component {
         });
         //if all images needed have been taken
         if (this.state.activeGridLine === this.state.numberOfLines) {
+          DeviceEventEmitter.removeListener('MotionData', () => this.listener(data));
           NativeModules.DeviceMotion.stopDeviceMotionUpdates();
           this.setState({
             showVisualizer : false
