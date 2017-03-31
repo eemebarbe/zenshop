@@ -7,10 +7,12 @@ import {
   View,
   Button,
   Dimensions,
+  CameraRoll,
   ScrollView
 } from 'react-native';
 import { StackNavigator, NavigationActions } from 'react-navigation';
 import RNFS from 'react-native-fs';
+
 
 export class ViewCapture extends Component {
 
@@ -39,6 +41,14 @@ export class ViewCapture extends Component {
     })
   }
 
+  saveCameraRoll() {
+    const { params } = this.props.navigation.state;
+    params.images.map((thisImage) => {
+      CameraRoll.saveToCameraRoll(thisImage, "photo");
+    });
+    this.deleteImages();
+  }
+
   render() {
     const { params } = this.props.navigation.state;
     const renderImages = params.images.map((thisImage) => {
@@ -52,6 +62,9 @@ export class ViewCapture extends Component {
         {renderImages}
         <View style={[styles.UIGeneral, styles.getStarted]}>
           <Button title="Try Again" color="white" onPress={this.goBack.bind(this)} />
+        </View>
+        <View style={[styles.UIGeneral, styles.getStarted]}>
+          <Button title="Send To Camera Roll" color="white" onPress={this.saveCameraRoll.bind(this)} />
         </View>
       </View>
       </ScrollView>

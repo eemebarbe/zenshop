@@ -12,6 +12,7 @@ import { StackNavigator } from 'react-navigation';
 import Camera from 'react-native-camera';
 import { ViewOverlay, AngleVisual } from './cameraoverlays.js';
 
+
 export class CameraView extends Component {
 
   constructor(props) {
@@ -39,36 +40,35 @@ export class CameraView extends Component {
     this.startMotion();
   }
 
-  listener(data) {
+  startMotion() {
     const remainder = 180 - this.state.middleRange;
     //bottom point of middle range in degrees
     var bottom = remainder / 2;
     const top = 180 - bottom;
     const numberOfDivisionsVirtual = this.state.numberOfLines - 1;
     const divisionSizeVirtual = this.state.middleRange / numberOfDivisionsVirtual;
-    const angle = (Math.atan2(data.gravity.y, data.gravity.x) + (Math.PI));
-    const angle2 = (Math.atan2(data.gravity.x, data.gravity.z) + (Math.PI));
 
-    this.setState({
-      angleDegrees: (angle * 180 / Math.PI),
-      angleDegrees2: (angle2 * 180 / Math.PI)
-    });
-    //if there are still grid lines to be used
-    if(this.state.activeGridLine < this.state.numberOfLines) {
-      //if camera is pointed at the correct angle (within reason)
-      if(this.state.angleDegrees2 > (bottom - .1) && this.state.angleDegrees2 < (bottom + .1)){
-        this.takePicture();
-        this.setState({
-          activeGridLine : this.state.activeGridLine + 1
-        });
-        bottom = bottom + divisionSizeVirtual;
-      }
-    }
-  }
-
-  startMotion() {
     NativeModules.DeviceMotion.setDeviceMotionUpdateInterval(0.085);
-    DeviceEventEmitter.addListener('MotionData', () => this.listener(data));
+    DeviceEventEmitter.addListener('MotionData', function (data) {
+      const angle = (Math.atan2(data.gravity.y, data.gravity.x) + (Math.PI));
+      const angle2 = (Math.atan2(data.gravity.x, data.gravity.z) + (Math.PI));
+
+      this.setState({
+        angleDegrees: (angle * 180 / Math.PI),
+        angleDegrees2: (angle2 * 180 / Math.PI)
+      });
+      //if there are still grid lines to be used
+      if(this.state.activeGridLine < this.state.numberOfLines) {
+        //if camera is pointed at the correct angle (within reason)
+        if(this.state.angleDegrees2 > (bottom - .1) && this.state.angleDegrees2 < (bottom + .1)){
+          this.takePicture();
+          this.setState({
+            activeGridLine : this.state.activeGridLine + 1
+          });
+          bottom = bottom + divisionSizeVirtual;
+        }
+      }
+    }.bind(this));
 
     NativeModules.DeviceMotion.startDeviceMotionUpdates();
   }
@@ -83,7 +83,6 @@ export class CameraView extends Component {
         });
         //if all images needed have been taken
         if (this.state.activeGridLine === this.state.numberOfLines) {
-          DeviceEventEmitter.removeListener('MotionData', () => this.listener(data));
           NativeModules.DeviceMotion.stopDeviceMotionUpdates();
           this.setState({
             showVisualizer : false
@@ -106,16 +105,16 @@ export class CameraView extends Component {
         style={styles.preview}
         aspect={Camera.constants.Aspect.fill}
         orientation={Camera.constants.Orientation.landscapeRight}
-        captureTarget={Camera.constants.CaptureTarget.disk} />
+        captureTarget={Camera.constants.CaptureTarget.temp} />
         <View style={styles.preview2}>
           <ViewOverlay />
           { !this.state.showVisualizer ? null :
-          <AngleVisual
-           activeGridLine={this.state.activeGridLine} 
-           angleDegrees={this.state.angleDegrees} 
-           zAnglePercentage={zAnglePercentage} 
-           middleRange={this.state.middleRange} 
-           numberOfLines={this.state.numberOfLines} />
+            <AngleVisual
+             activeGridLine={this.state.activeGridLine} 
+             angleDegrees={this.state.angleDegrees} 
+             zAnglePercentage={zAnglePercentage} 
+             middleRange={this.state.middleRange} 
+             numberOfLines={this.state.numberOfLines} />
           }
         </View>
       </View>
@@ -147,6 +146,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: Dimensions.get('window').height,
     width: Dimensions.get('window').width
+  },
+  cameraShutter: {
+    height:50,
+    width:50,
+    borderColor:"pink",
+    borderWidth:5,
+    borderRadius:5,
+    marginBottom:10
   }
 });
 
